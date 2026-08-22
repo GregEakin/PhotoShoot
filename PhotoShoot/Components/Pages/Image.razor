@@ -1,0 +1,57 @@
+@page "/image/{Id}"
+@inject IImageCatalog Catalog
+
+<PageTitle>@(image?.DisplayName ?? "Image not found")</PageTitle>
+
+@if (image is null)
+{
+    <h1>Image not found</h1>
+    <p>The requested image is not available in the catalog.</p>
+    <a href="/" class="btn btn-primary">Back to gallery</a>
+}
+else
+{
+    <h1>@image.DisplayName</h1>
+
+    <div class="mb-3">
+        <a href="/" class="btn btn-outline-secondary">Back to gallery</a>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm">
+                <img src="@image.ImageUrl" class="card-img-top" alt="@image.DisplayName" />
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">Details</h5>
+                    <dl class="row mb-0">
+                        <dt class="col-5">File</dt>
+                        <dd class="col-7">@image.FileName</dd>
+
+                        <dt class="col-5">Created</dt>
+                        <dd class="col-7">@image.CreatedUtc.ToLocalTime().ToString("g")</dd>
+
+                        <dt class="col-5">Thumbnail</dt>
+                        <dd class="col-7"><img src="@image.ThumbnailUrl" class="img-fluid rounded" alt="@image.DisplayName thumbnail" /></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string Id { get; set; } = string.Empty;
+
+    private MonitoredImage? image;
+
+    protected override void OnParametersSet()
+    {
+        image = Catalog.GetById(Id);
+    }
+}

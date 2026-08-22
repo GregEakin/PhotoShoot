@@ -6,15 +6,27 @@
         public required WebApplicationFactory WebApplicationFactory { get; init; }
 
         [Test]
-        public async Task Test()
+        public async Task HomePage_renders_gallery()
         {
             var client = WebApplicationFactory.CreateClient();
 
-            var response = await client.GetAsync("/ping");
+            var response = await client.GetAsync("/");
+            var content = await response.Content.ReadAsStringAsync();
 
-            var stringContent = await response.Content.ReadAsStringAsync();
+            await Assert.That(response.IsSuccessStatusCode).IsTrue();
+            await Assert.That(content.Contains("PhotoShoot Gallery")).IsTrue();
+        }
 
-            await Assert.That(stringContent).IsEqualTo("Hello, World!");
+        [Test]
+        public async Task MissingImagePage_renders_not_found_message()
+        {
+            var client = WebApplicationFactory.CreateClient();
+
+            var response = await client.GetAsync("/image/example");
+            var content = await response.Content.ReadAsStringAsync();
+
+            await Assert.That(response.IsSuccessStatusCode).IsTrue();
+            await Assert.That(content.Contains("Image not found")).IsTrue();
         }
     }
 }
