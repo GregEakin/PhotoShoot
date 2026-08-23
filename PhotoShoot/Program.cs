@@ -17,6 +17,9 @@ builder.Services.AddSingleton<IImageNotificationService, ImageNotificationServic
 builder.Services.AddHostedService<ImageFolderMonitorService>();
 
 var imageMonitorOptions = builder.Configuration.GetSection("ImageMonitor").Get<ImageMonitorOptions>() ?? new ImageMonitorOptions();
+ValidateConfiguredPathForLinux(imageMonitorOptions.InputFolder, "InputFolder");
+ValidateConfiguredPathForLinux(imageMonitorOptions.ThumbnailFolder, "ThumbnailFolder");
+
 var inputFolder = Path.GetFullPath(imageMonitorOptions.InputFolder);
 var thumbnailFolder = Path.GetFullPath(imageMonitorOptions.ThumbnailFolder);
 Directory.CreateDirectory(inputFolder);
@@ -53,3 +56,27 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
+
+static void ValidateConfiguredPathForLinux(string configuredPath, string settingName)
+{
+    if (!OperatingSystem.IsLinux())
+    {
+        return;
+    }
+
+    if (!LooksLikeWindowsPath(configuredPath))
+    {
+        return;
+    }
+
+    throw new InvalidOperationException(
+        $"ImageMonitor:{settingName} is set to '{configuredPath}', which looks like a Windows-style path. " +
+        "Use a Linux path such as '/home/ftpuser' or a relative path such as 'incoming'.");
+}
+
+static bool LooksLikeWindowsPath(string path)
+{
+    return path.Length >= 2
+        && char.IsLetter(path[0])
+        && path[1] == ':';
+}
