@@ -22,6 +22,11 @@ public sealed class ImageThumbnailService : IImageThumbnailService
         var thumbnailFileName = Path.GetFileNameWithoutExtension(sourceFilePath) + ".jpg";
         var thumbnailPath = Path.Combine(_options.ThumbnailFolder, thumbnailFileName);
 
+        if (File.Exists(thumbnailPath))
+        {
+            return thumbnailPath;
+        }
+
         using var image = new MagickImage(sourceFilePath);
         image.AutoOrient();
         image.Thumbnail(new MagickGeometry(320, 320) { IgnoreAspectRatio = false });
@@ -41,6 +46,11 @@ public sealed class ImageThumbnailService : IImageThumbnailService
 
         var histogramFileName = Path.GetFileNameWithoutExtension(sourceFilePath) + "-hist.png";
         var histogramPath = Path.Combine(_options.HistogramFolder, histogramFileName);
+
+        if (File.Exists(histogramPath))
+        {
+            return Task.FromResult(histogramPath);
+        }
 
         using var sourceImage = new MagickImage(sourceFilePath);
         sourceImage.AutoOrient();
