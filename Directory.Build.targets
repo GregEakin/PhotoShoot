@@ -1,5 +1,9 @@
 <Project>
-  <!-- This file intentionally stops MSBuild from traversing parent directories
-	   for Directory.Build.targets files, preventing stray global targets on the
-	   build machine from interfering with this project. -->
+  <!-- Stop MSBuild traversing parent directories for Directory.Build.targets -->
+
+  <!-- Suppress MSB3552: no .resx files exist in this project; the SDK's default
+	   wildcard EmbeddedResource include fails on Linux when no files match. -->
+  <ItemGroup>
+	<EmbeddedResource Remove="**/*.resx" />
+  </ItemGroup>
 </Project>
