@@ -1,5 +1,9 @@
 @page "/image/{Id}"
+@rendermode InteractiveServer
+@implements IDisposable
 @inject IImageCatalog Catalog
+@inject IImageNotificationService Notifications
+@inject NavigationManager NavigationManager
 
 <PageTitle>@(image?.DisplayName ?? "Image not found")</PageTitle>
 
@@ -50,8 +54,26 @@ else
 
     private MonitoredImage? image;
 
+    protected override void OnInitialized()
+    {
+        Notifications.ImageAdded += OnImageAdded;
+    }
+
     protected override void OnParametersSet()
     {
         image = Catalog.GetById(Id);
     }
-}
+
+    private void OnImageAdded(MonitoredImage newImage)
+    {
+        _ = InvokeAsync(() =>
+        {
+            NavigationManager.NavigateTo($"/image/{newImage.Id}");
+        });
+    }
+
+    public void Dispose()
+    {
+        Notifications.ImageAdded -= OnImageAdded;
+    }
+}}
