@@ -33,17 +33,17 @@ else
                 <div class="card-body">
                     <h5 class="card-title">Details</h5>
                     <dl class="row mb-0">
-                        <dt class="col-5">File</dt>
-                        <dd class="col-7">@_image.FileName</dd>
+                        <dt class="col-3">File</dt>
+                        <dd class="col-9">@_image.FileName</dd>
 
-                        <dt class="col-5">Created</dt>
-                        <dd class="col-7">@_image.CreatedUtc.ToLocalTime().ToString("g")</dd>
+                        <dt class="col-3">Created</dt>
+                        <dd class="col-9">@_image.CreatedUtc.ToLocalTime().ToString("g")</dd>
 
-                        <dt class="col-5">Caption</dt>
-                        <dd class="col-7">@_image.Caption</dd>
+                        <dt class="col-3">Caption</dt>
+                        <dd class="col-9">@_image.Caption</dd>
 
-                        <dt class="col-5">Thumbnail</dt>
-                        <dd class="col-7"><img src="@_image.ThumbnailUrl" class="img-fluid rounded" alt="@_image.DisplayName thumbnail" /></dd>
+                        <dt class="col-3">Thumbnail</dt>
+                        <dd class="col-9"><img src="@_image.ThumbnailUrl" class="img-fluid rounded" alt="@_image.DisplayName thumbnail" /></dd>
                     </dl>
                 </div>
             </div>
