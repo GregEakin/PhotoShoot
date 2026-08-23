@@ -1,0 +1,5 @@
+<Project>
+  <!-- This file intentionally stops MSBuild from traversing parent directories
+	   for Directory.Build.props files, preventing stray global props on the
+	   build machine from interfering with this project. -->
+</Project>
