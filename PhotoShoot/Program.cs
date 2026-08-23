@@ -17,8 +17,10 @@ builder.Services.AddSingleton<IImageNotificationService, ImageNotificationServic
 builder.Services.AddHostedService<ImageFolderMonitorService>();
 
 var imageMonitorOptions = builder.Configuration.GetSection("ImageMonitor").Get<ImageMonitorOptions>() ?? new ImageMonitorOptions();
-Directory.CreateDirectory(imageMonitorOptions.InputFolder);
-Directory.CreateDirectory(imageMonitorOptions.ThumbnailFolder);
+var inputFolder = Path.GetFullPath(imageMonitorOptions.InputFolder);
+var thumbnailFolder = Path.GetFullPath(imageMonitorOptions.ThumbnailFolder);
+Directory.CreateDirectory(inputFolder);
+Directory.CreateDirectory(thumbnailFolder);
 
 var app = builder.Build();
 
@@ -33,13 +35,13 @@ app.UseHttpsRedirection();
 
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(imageMonitorOptions.InputFolder),
+    FileProvider = new PhysicalFileProvider(inputFolder),
     RequestPath = imageMonitorOptions.PublicImagePath
 });
 
 app.UseStaticFiles(new StaticFileOptions
 {
-    FileProvider = new PhysicalFileProvider(imageMonitorOptions.ThumbnailFolder),
+    FileProvider = new PhysicalFileProvider(thumbnailFolder),
     RequestPath = imageMonitorOptions.PublicThumbnailPath
 });
 
