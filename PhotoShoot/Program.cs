@@ -55,6 +55,8 @@ app.MapHub<ImageHub>("/imageHub");
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
+app.Logger.LogInformation("Image monitor watching folder: {InputFolder} (thumbnails: {ThumbnailFolder})", inputFolder, thumbnailFolder);
+
 app.Run();
 
 static void ValidateConfiguredPathForLinux(string configuredPath, string settingName)
