@@ -5,9 +5,9 @@
 @inject IImageNotificationService Notifications
 @inject NavigationManager NavigationManager
 
-<PageTitle>@(image?.DisplayName ?? "Image not found")</PageTitle>
+<PageTitle>@(_image?.DisplayName ?? "Image not found")</PageTitle>
 
-@if (image is null)
+@if (_image is null)
 {
     <h1>Image not found</h1>
     <p>The requested image is not available in the catalog.</p>
@@ -15,7 +15,7 @@
 }
 else
 {
-    <h1>@image.DisplayName</h1>
+    <h1>@_image.DisplayName</h1>
 
     <div class="mb-3">
         <a href="/" class="btn btn-outline-secondary">Back to gallery</a>
@@ -24,7 +24,7 @@ else
     <div class="row g-4">
         <div class="col-12 col-lg-8">
             <div class="card shadow-sm">
-                <img src="@image.ImageUrl" class="card-img-top" alt="@image.DisplayName" />
+                <img src="@_image.ImageUrl" class="card-img-top" alt="@_image.DisplayName" />
             </div>
         </div>
 
@@ -34,13 +34,13 @@ else
                     <h5 class="card-title">Details</h5>
                     <dl class="row mb-0">
                         <dt class="col-5">File</dt>
-                        <dd class="col-7">@image.FileName</dd>
+                        <dd class="col-7">@_image.FileName</dd>
 
                         <dt class="col-5">Created</dt>
-                        <dd class="col-7">@image.CreatedUtc.ToLocalTime().ToString("g")</dd>
+                        <dd class="col-7">@_image.CreatedUtc.ToLocalTime().ToString("g")</dd>
 
                         <dt class="col-5">Thumbnail</dt>
-                        <dd class="col-7"><img src="@image.ThumbnailUrl" class="img-fluid rounded" alt="@image.DisplayName thumbnail" /></dd>
+                        <dd class="col-7"><img src="@_image.ThumbnailUrl" class="img-fluid rounded" alt="@_image.DisplayName thumbnail" /></dd>
                     </dl>
                 </div>
             </div>
@@ -52,7 +52,7 @@ else
     [Parameter]
     public string Id { get; set; } = string.Empty;
 
-    private MonitoredImage? image;
+    private MonitoredImage? _image;
 
     protected override void OnInitialized()
     {
@@ -61,7 +61,7 @@ else
 
     protected override void OnParametersSet()
     {
-        image = Catalog.GetById(Id);
+        _image = Catalog.GetById(Id);
     }
 
     private void OnImageAdded(MonitoredImage newImage)

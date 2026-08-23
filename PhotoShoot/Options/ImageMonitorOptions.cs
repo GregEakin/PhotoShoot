@@ -2,15 +2,15 @@ namespace PhotoShoot.Options;
 
 public sealed class ImageMonitorOptions
 {
-    public string InputFolder { get; set; } = @"C:\PhotoShoot\Incoming";
+    public string InputFolder { get; init; } = @"C:\PhotoShoot\Incoming";
 
-    public string ThumbnailFolder { get; set; } = @"C:\PhotoShoot\Incoming\thumbnails";
+    public string ThumbnailFolder { get; init; } = @"C:\PhotoShoot\Incoming\thumbnails";
 
-    public string PublicImagePath { get; set; } = "/images";
+    public string PublicImagePath { get; init; } = "/images";
 
-    public string PublicThumbnailPath { get; set; } = "/thumbnails";
+    public string PublicThumbnailPath { get; init; } = "/thumbnails";
 
-    public int PollIntervalSeconds { get; set; } = 5;
+    public int PollIntervalSeconds { get; init; } = 5;
 
-    public string[] SupportedExtensions { get; set; } = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"];
+    public string[] SupportedExtensions { get; init; } = [".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"];
 }

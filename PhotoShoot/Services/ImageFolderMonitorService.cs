@@ -1,5 +1,4 @@
 using Microsoft.Extensions.Options;
-using PhotoShoot.Models;
 using PhotoShoot.Options;
 
 namespace PhotoShoot.Services;

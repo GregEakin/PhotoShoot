@@ -38,7 +38,7 @@ else
 
     protected override void OnInitialized()
     {
-        images = Catalog.GetAll().ToList();
+        images = [.. Catalog.GetAll()];
         Notifications.ImageAdded += OnImageAdded;
     }
 
