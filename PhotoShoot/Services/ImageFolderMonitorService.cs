@@ -12,6 +12,7 @@ public sealed class ImageFolderMonitorService : BackgroundService
     private readonly IImageThumbnailService _thumbnailService;
     private readonly IImageNotificationService _notificationService;
     private readonly Dictionary<string, FileSignature> _processedFiles = new(StringComparer.OrdinalIgnoreCase);
+    private bool _initialScanComplete;
 
     public ImageFolderMonitorService(
         IOptions<ImageMonitorOptions> options,
@@ -33,6 +34,7 @@ public sealed class ImageFolderMonitorService : BackgroundService
         Directory.CreateDirectory(_options.ThumbnailFolder);
 
         await ScanFolderAsync(stoppingToken);
+        _initialScanComplete = true;
 
         using var timer = new PeriodicTimer(TimeSpan.FromSeconds(Math.Max(1, _options.PollIntervalSeconds)));
         while (await timer.WaitForNextTickAsync(stoppingToken))
@@ -90,7 +92,10 @@ public sealed class ImageFolderMonitorService : BackgroundService
         var image = _catalog.Upsert(filePath, relativeImageUrl, relativeThumbnailUrl, fileInfo.LastWriteTimeUtc);
         _processedFiles[filePath] = signature;
 
-        await _notificationService.NotifyImageAddedAsync(image, cancellationToken);
+        if (_initialScanComplete)
+        {
+            await _notificationService.NotifyImageAddedAsync(image, cancellationToken);
+        }
         if (_logger.IsEnabled(LogLevel.Information))
             _logger.LogInformation("Added image {ImageFile}.", fileInfo.Name);
     }
