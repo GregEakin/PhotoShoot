@@ -91,7 +91,8 @@ public sealed class ImageFolderMonitorService : BackgroundService
         _processedFiles[filePath] = signature;
 
         await _notificationService.NotifyImageAddedAsync(image, cancellationToken);
-        _logger.LogInformation("Added image {ImageFile}.", fileInfo.Name);
+        if (_logger.IsEnabled(LogLevel.Information))
+            _logger.LogInformation("Added image {ImageFile}.", fileInfo.Name);
     }
 
     private bool IsSupportedImage(string filePath)

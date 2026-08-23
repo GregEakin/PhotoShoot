@@ -7,9 +7,7 @@ public sealed class InMemoryImageCatalog : IImageCatalog
 {
     private readonly ConcurrentDictionary<string, MonitoredImage> _images = new(StringComparer.OrdinalIgnoreCase);
 
-    public IReadOnlyCollection<MonitoredImage> GetAll() => _images.Values
-        .OrderByDescending(image => image.CreatedUtc)
-        .ToArray();
+    public IReadOnlyCollection<MonitoredImage> GetAll() => [.. _images.Values.OrderByDescending(image => image.CreatedUtc)];
 
     public MonitoredImage? GetById(string id)
     {
@@ -37,7 +35,7 @@ public sealed class InMemoryImageCatalog : IImageCatalog
     private static string CreateId(string fileName)
     {
         var slug = fileName.Trim().ToLowerInvariant();
-        var normalized = new string(slug.Select(character => char.IsLetterOrDigit(character) ? character : '-').ToArray());
+        var normalized = new string([.. slug.Select(character => char.IsLetterOrDigit(character) ? character : '-')]);
         return string.Join('-', normalized.Split('-', StringSplitOptions.RemoveEmptyEntries));
     }
 }

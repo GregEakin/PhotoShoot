@@ -1,5 +1,4 @@
-using System.Drawing;
-using System.Drawing.Imaging;
+using ImageMagick;
 using Microsoft.Extensions.Options;
 using PhotoShoot.Options;
 
@@ -14,7 +13,7 @@ public sealed class ImageThumbnailService : IImageThumbnailService
         _options = options.Value;
     }
 
-    public Task<string> CreateThumbnailAsync(string sourceFilePath, CancellationToken cancellationToken = default)
+    public async Task<string> CreateThumbnailAsync(string sourceFilePath, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -23,27 +22,14 @@ public sealed class ImageThumbnailService : IImageThumbnailService
         var thumbnailFileName = Path.GetFileNameWithoutExtension(sourceFilePath) + ".jpg";
         var thumbnailPath = Path.Combine(_options.ThumbnailFolder, thumbnailFileName);
 
-        using var sourceImage = Image.FromFile(sourceFilePath);
-        using var thumbnailImage = CreateThumbnail(sourceImage, 320, 320);
-        thumbnailImage.Save(thumbnailPath, ImageFormat.Jpeg);
+        using var image = new MagickImage(sourceFilePath);
+        image.AutoOrient();
+        image.Thumbnail(new MagickGeometry(320, 320) { IgnoreAspectRatio = false });
+        image.Format = MagickFormat.Jpeg;
+        image.Quality = 85;
 
-        return Task.FromResult(thumbnailPath);
-    }
+        await image.WriteAsync(thumbnailPath, cancellationToken);
 
-    private static Bitmap CreateThumbnail(Image sourceImage, int maxWidth, int maxHeight)
-    {
-        var ratio = Math.Min((double)maxWidth / sourceImage.Width, (double)maxHeight / sourceImage.Height);
-        var width = Math.Max(1, (int)Math.Round(sourceImage.Width * ratio));
-        var height = Math.Max(1, (int)Math.Round(sourceImage.Height * ratio));
-
-        var thumbnail = new Bitmap(width, height);
-        using var graphics = Graphics.FromImage(thumbnail);
-        graphics.CompositingQuality = System.Drawing.Drawing2D.CompositingQuality.HighQuality;
-        graphics.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
-        graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.HighQuality;
-        graphics.PixelOffsetMode = System.Drawing.Drawing2D.PixelOffsetMode.HighQuality;
-        graphics.DrawImage(sourceImage, 0, 0, width, height);
-
-        return thumbnail;
+        return thumbnailPath;
     }
 }
