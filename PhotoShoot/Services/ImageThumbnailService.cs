@@ -1,6 +1,7 @@
-using ImageMagick;
 using Microsoft.Extensions.Options;
 using PhotoShoot.Options;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 
 namespace PhotoShoot.Services;
 
@@ -22,13 +23,16 @@ public sealed class ImageThumbnailService : IImageThumbnailService
         var thumbnailFileName = Path.GetFileNameWithoutExtension(sourceFilePath) + ".jpg";
         var thumbnailPath = Path.Combine(_options.ThumbnailFolder, thumbnailFileName);
 
-        using var image = new MagickImage(sourceFilePath);
-        image.AutoOrient();
-        image.Thumbnail(new MagickGeometry(320, 320) { IgnoreAspectRatio = false });
-        image.Format = MagickFormat.Jpeg;
-        image.Quality = 85;
+        using var image = await Image.LoadAsync(sourceFilePath, cancellationToken);
+        image.Mutate(context => context
+            .AutoOrient()
+            .Resize(new ResizeOptions
+            {
+                Size = new Size(320, 320),
+                Mode = ResizeMode.Max
+            }));
 
-        await image.WriteAsync(thumbnailPath, cancellationToken);
+        await image.SaveAsJpegAsync(thumbnailPath, cancellationToken);
 
         return thumbnailPath;
     }
