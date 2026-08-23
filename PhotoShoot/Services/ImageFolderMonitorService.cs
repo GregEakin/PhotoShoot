@@ -31,6 +31,7 @@ public sealed class ImageFolderMonitorService : BackgroundService
     {
         Directory.CreateDirectory(_options.InputFolder);
         Directory.CreateDirectory(_options.ThumbnailFolder);
+        Directory.CreateDirectory(_options.HistogramFolder);
 
         await ScanFolderAsync(stoppingToken);
         _initialScanComplete = true;
@@ -87,8 +88,10 @@ public sealed class ImageFolderMonitorService : BackgroundService
         var relativeImageUrl = CombinePublicPath(_options.PublicImagePath, Path.GetFileName(filePath));
         var thumbnailPath = await _thumbnailService.CreateThumbnailAsync(filePath, cancellationToken);
         var relativeThumbnailUrl = CombinePublicPath(_options.PublicThumbnailPath, Path.GetFileName(thumbnailPath));
+        var histogramPath = await _thumbnailService.CreateHistogramAsync(filePath, cancellationToken);
+        var relativeHistogramUrl = CombinePublicPath(_options.PublicHistogramPath, Path.GetFileName(histogramPath));
 
-        var image = _catalog.Upsert(filePath, relativeImageUrl, relativeThumbnailUrl, fileInfo.LastWriteTimeUtc);
+        var image = _catalog.Upsert(filePath, relativeImageUrl, relativeThumbnailUrl, relativeHistogramUrl, fileInfo.LastWriteTimeUtc);
         _processedFiles[filePath] = signature;
 
         if (_initialScanComplete)

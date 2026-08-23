@@ -6,9 +6,13 @@ public sealed class ImageMonitorOptions
 
     public string ThumbnailFolder { get; init; } = @"C:\PhotoShoot\Incoming\thumbnails";
 
+    public string HistogramFolder { get; init; } = @"C:\PhotoShoot\Incoming\histograms";
+
     public string PublicImagePath { get; init; } = "/images";
 
     public string PublicThumbnailPath { get; init; } = "/thumbnails";
+
+    public string PublicHistogramPath { get; init; } = "/histograms";
 
     public int PollIntervalSeconds { get; init; } = 5;
 

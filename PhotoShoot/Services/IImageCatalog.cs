@@ -8,5 +8,5 @@ public interface IImageCatalog
 
     MonitoredImage? GetById(string id);
 
-    MonitoredImage Upsert(string filePath, string imageUrl, string thumbnailUrl, DateTimeOffset createdUtc);
+    MonitoredImage Upsert(string filePath, string imageUrl, string thumbnailUrl, string histogramUrl, DateTimeOffset createdUtc);
 }

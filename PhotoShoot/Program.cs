@@ -19,11 +19,14 @@ builder.Services.AddHostedService<ImageFolderMonitorService>();
 var imageMonitorOptions = builder.Configuration.GetSection("ImageMonitor").Get<ImageMonitorOptions>() ?? new ImageMonitorOptions();
 ValidateConfiguredPathForLinux(imageMonitorOptions.InputFolder, "InputFolder");
 ValidateConfiguredPathForLinux(imageMonitorOptions.ThumbnailFolder, "ThumbnailFolder");
+ValidateConfiguredPathForLinux(imageMonitorOptions.HistogramFolder, "HistogramFolder");
 
 var inputFolder = Path.GetFullPath(imageMonitorOptions.InputFolder);
 var thumbnailFolder = Path.GetFullPath(imageMonitorOptions.ThumbnailFolder);
+var histogramFolder = Path.GetFullPath(imageMonitorOptions.HistogramFolder);
 Directory.CreateDirectory(inputFolder);
 Directory.CreateDirectory(thumbnailFolder);
+Directory.CreateDirectory(histogramFolder);
 
 var app = builder.Build();
 
@@ -48,6 +51,12 @@ app.UseStaticFiles(new StaticFileOptions
     RequestPath = imageMonitorOptions.PublicThumbnailPath
 });
 
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(histogramFolder),
+    RequestPath = imageMonitorOptions.PublicHistogramPath
+});
+
 app.UseAntiforgery();
 
 app.MapStaticAssets();
@@ -55,7 +64,8 @@ app.MapHub<ImageHub>("/imageHub");
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
-app.Logger.LogInformation("Image monitor watching folder: {InputFolder} (thumbnails: {ThumbnailFolder})", inputFolder, thumbnailFolder);
+if (app.Logger.IsEnabled(LogLevel.Information))
+    app.Logger.LogInformation("Image monitor watching folder: {InputFolder} (thumbnails: {ThumbnailFolder}, histograms: {HistogramFolder})", inputFolder, thumbnailFolder, histogramFolder);
 
 app.Run();
 
