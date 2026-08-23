@@ -15,7 +15,7 @@ public sealed class InMemoryImageCatalog : IImageCatalog
         return image;
     }
 
-    public MonitoredImage Upsert(string filePath, string imageUrl, string thumbnailUrl, string histogramUrl, string caption, DateTimeOffset createdUtc)
+    public MonitoredImage Upsert(string filePath, string imageUrl, string thumbnailUrl, string histogramUrl, string metadata, DateTimeOffset createdUtc)
     {
         var fileName = Path.GetFileName(filePath);
         var id = CreateId(fileName);
@@ -27,7 +27,7 @@ public sealed class InMemoryImageCatalog : IImageCatalog
             ImageUrl: imageUrl,
             ThumbnailUrl: thumbnailUrl,
             HistogramUrl: histogramUrl,
-            Caption: caption,
+            Metadata: metadata,
             CreatedUtc: createdUtc);
 
         _images[id] = image;

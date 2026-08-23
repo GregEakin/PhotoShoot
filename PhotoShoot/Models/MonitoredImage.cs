@@ -7,5 +7,5 @@ public sealed record MonitoredImage(
     string ImageUrl,
     string ThumbnailUrl,
     string HistogramUrl,
-    string Caption,
+    string Metadata,
     DateTimeOffset CreatedUtc);

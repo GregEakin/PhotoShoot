@@ -92,9 +92,9 @@ public sealed class ImageFolderMonitorService : BackgroundService
         var relativeThumbnailUrl = CombinePublicPath(_options.PublicThumbnailPath, Path.GetFileName(thumbnailPath));
         var histogramPath = await _thumbnailService.CreateHistogramAsync(filePath, cancellationToken);
         var relativeHistogramUrl = CombinePublicPath(_options.PublicHistogramPath, Path.GetFileName(histogramPath));
-        var caption = BuildCaption(filePath);
+        var metadata = BuildMetadata(filePath);
 
-        var image = _catalog.Upsert(filePath, relativeImageUrl, relativeThumbnailUrl, relativeHistogramUrl, caption, fileInfo.LastWriteTimeUtc);
+        var image = _catalog.Upsert(filePath, relativeImageUrl, relativeThumbnailUrl, relativeHistogramUrl, metadata, fileInfo.LastWriteTimeUtc);
         _processedFiles[filePath] = signature;
 
         if (_initialScanComplete)
@@ -137,14 +137,14 @@ public sealed class ImageFolderMonitorService : BackgroundService
         return false;
     }
 
-    private static string BuildCaption(string filePath)
+    private static string BuildMetadata(string filePath)
     {
         using var image = new MagickImage(filePath);
 
         var profile = image.GetExifProfile();
         if (profile == null)
         {
-            return "Caption metadata not available";
+            return "Metadata not available";
         }
 
         // foreach (var value in profile.Values)
@@ -251,7 +251,7 @@ public sealed class ImageFolderMonitorService : BackgroundService
 
         if (int.TryParse(flash, NumberStyles.Integer, CultureInfo.InvariantCulture, out var flashCode))
         {
-            return (flashCode & 0x1) == 0x1;
+            return (flashCode & 0x01) != 0x00;
         }
 
         return false;
