@@ -1,3 +1,5 @@
+using System.Globalization;
+using ImageMagick;
 using Microsoft.Extensions.Options;
 using PhotoShoot.Options;
 
@@ -90,8 +92,9 @@ public sealed class ImageFolderMonitorService : BackgroundService
         var relativeThumbnailUrl = CombinePublicPath(_options.PublicThumbnailPath, Path.GetFileName(thumbnailPath));
         var histogramPath = await _thumbnailService.CreateHistogramAsync(filePath, cancellationToken);
         var relativeHistogramUrl = CombinePublicPath(_options.PublicHistogramPath, Path.GetFileName(histogramPath));
+        var caption = BuildCaption(filePath);
 
-        var image = _catalog.Upsert(filePath, relativeImageUrl, relativeThumbnailUrl, relativeHistogramUrl, fileInfo.LastWriteTimeUtc);
+        var image = _catalog.Upsert(filePath, relativeImageUrl, relativeThumbnailUrl, relativeHistogramUrl, caption, fileInfo.LastWriteTimeUtc);
         _processedFiles[filePath] = signature;
 
         if (_initialScanComplete)
@@ -129,6 +132,48 @@ public sealed class ImageFolderMonitorService : BackgroundService
             {
                 await Task.Delay(250, cancellationToken);
             }
+        }
+
+        return false;
+    }
+
+    private static string BuildCaption(string filePath)
+    {
+        using var image = new MagickImage(filePath);
+
+        var exposure = image.GetAttribute("exif:ExposureTime");
+        var fNumber = image.GetAttribute("exif:FNumber");
+        var iso = image.GetAttribute("exif:ISO");
+        var focalLength = image.GetAttribute("exif:FocalLength");
+        var flash = image.GetAttribute("exif:Flash");
+
+        if (string.IsNullOrWhiteSpace(exposure)
+            || string.IsNullOrWhiteSpace(fNumber)
+            || string.IsNullOrWhiteSpace(iso)
+            || string.IsNullOrWhiteSpace(focalLength))
+        {
+            return "Caption metadata not available";
+        }
+
+        var flashSuffix = IsFlashFired(flash) ? " w/ flash" : string.Empty;
+        return $"{exposure} sec at f/{fNumber} with ISO {iso} and {focalLength} focal length{flashSuffix}";
+    }
+
+    private static bool IsFlashFired(string? flash)
+    {
+        if (string.IsNullOrWhiteSpace(flash))
+        {
+            return false;
+        }
+
+        if (flash.Contains("fired", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        if (int.TryParse(flash, NumberStyles.Integer, CultureInfo.InvariantCulture, out var flashCode))
+        {
+            return (flashCode & 0x1) == 0x1;
         }
 
         return false;
