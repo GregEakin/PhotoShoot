@@ -1,4 +1,5 @@
 using ImageMagick;
+using ImageMagick.Formats;
 using Microsoft.Extensions.Options;
 using PhotoShoot.Options;
 
@@ -19,7 +20,7 @@ public sealed class ImageThumbnailService : IImageThumbnailService
 
         Directory.CreateDirectory(_options.ThumbnailFolder);
 
-        var thumbnailFileName = Path.GetFileNameWithoutExtension(sourceFilePath) + ".jpg";
+        var thumbnailFileName = Path.GetFileNameWithoutExtension(sourceFilePath) + ".webp";
         var thumbnailPath = Path.Combine(_options.ThumbnailFolder, thumbnailFileName);
 
         if (File.Exists(thumbnailPath))
@@ -27,13 +28,15 @@ public sealed class ImageThumbnailService : IImageThumbnailService
             return thumbnailPath;
         }
 
+        var defines = new WebPWriteDefines { AutoFilter = true, ThreadLevel = true };
         using var image = new MagickImage(sourceFilePath);
+        image.Format = MagickFormat.WebP;
+        image.Quality = 85;
         image.AutoOrient();
         image.Thumbnail(new MagickGeometry(320, 320) { IgnoreAspectRatio = false });
-        image.Format = MagickFormat.Jpeg;
-        image.Quality = 85;
+        image.Strip();
 
-        await image.WriteAsync(thumbnailPath, cancellationToken);
+        await image.WriteAsync(thumbnailPath, defines, cancellationToken);
 
         return thumbnailPath;
     }
