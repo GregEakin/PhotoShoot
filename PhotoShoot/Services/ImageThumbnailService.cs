@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using ImageMagick;
 using ImageMagick.Formats;
 using Microsoft.Extensions.Options;
@@ -7,6 +8,8 @@ namespace PhotoShoot.Services;
 
 public sealed class ImageThumbnailService : IImageThumbnailService
 {
+    private static readonly ConcurrentDictionary<string, SemaphoreSlim> ThumbnailLocks = new(StringComparer.OrdinalIgnoreCase);
+
     private readonly ImageMonitorOptions _options;
 
     public ImageThumbnailService(IOptions<ImageMonitorOptions> options)
@@ -22,23 +25,47 @@ public sealed class ImageThumbnailService : IImageThumbnailService
 
         var thumbnailFileName = Path.GetFileNameWithoutExtension(sourceFilePath) + ".webp";
         var thumbnailPath = Path.Combine(_options.ThumbnailFolder, thumbnailFileName);
+        var thumbnailLock = ThumbnailLocks.GetOrAdd(thumbnailPath, static _ => new SemaphoreSlim(1, 1));
 
-        if (File.Exists(thumbnailPath))
+        await thumbnailLock.WaitAsync(cancellationToken);
+        try
         {
+            if (File.Exists(thumbnailPath))
+            {
+                return thumbnailPath;
+            }
+
+            var defines = new WebPWriteDefines { AutoFilter = true, ThreadLevel = true };
+            var tempThumbnailPath = Path.Combine(_options.ThumbnailFolder, $".{thumbnailFileName}.{Guid.NewGuid():N}.tmp");
+
+            try
+            {
+                using var image = new MagickImage(sourceFilePath);
+                image.Format = MagickFormat.WebP;
+                image.Quality = 85;
+                image.AutoOrient();
+                image.Thumbnail(new MagickGeometry(320, 320) { IgnoreAspectRatio = false });
+                image.Strip();
+
+                await image.WriteAsync(tempThumbnailPath, defines, cancellationToken);
+                File.Move(tempThumbnailPath, thumbnailPath, true);
+            }
+            catch
+            {
+                if (File.Exists(tempThumbnailPath))
+                {
+                    File.Delete(tempThumbnailPath);
+                }
+
+                throw;
+            }
+
             return thumbnailPath;
         }
-
-        var defines = new WebPWriteDefines { AutoFilter = true, ThreadLevel = true };
-        using var image = new MagickImage(sourceFilePath);
-        image.Format = MagickFormat.WebP;
-        image.Quality = 85;
-        image.AutoOrient();
-        image.Thumbnail(new MagickGeometry(320, 320) { IgnoreAspectRatio = false });
-        image.Strip();
-
-        await image.WriteAsync(thumbnailPath, defines, cancellationToken);
-
-        return thumbnailPath;
+        finally
+        {
+            thumbnailLock.Release();
+        }
     }
 
     public Task<string> CreateHistogramAsync(string sourceFilePath, CancellationToken cancellationToken = default)
