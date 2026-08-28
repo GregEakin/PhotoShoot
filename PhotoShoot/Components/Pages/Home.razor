@@ -4,6 +4,7 @@
 @inject IImageCatalog Catalog
 @inject IImageNotificationService Notifications
 @inject NavigationManager NavigationManager
+@inject ILogger<Home> Logger
 
 <PageTitle>PhotoShoot Gallery</PageTitle>
 
@@ -40,6 +41,14 @@ else
     {
         _images = [.. Catalog.GetAll()];
         Notifications.ImageAdded += OnImageAdded;
+
+        if (Logger.IsEnabled(LogLevel.Information))
+        {
+            Logger.LogInformation(
+                "Home component subscribed to ImageAdded on instance {InstanceName}. Current image count: {ImageCount}.",
+                Environment.MachineName,
+                _images.Count);
+        }
     }
 
     private void OnImageAdded(MonitoredImage image)
@@ -47,6 +56,15 @@ else
         _ = InvokeAsync(() =>
         {
             _images = [image, .. _images.Where(existing => !string.Equals(existing.Id, image.Id, StringComparison.OrdinalIgnoreCase))];
+
+            if (Logger.IsEnabled(LogLevel.Information))
+            {
+                Logger.LogInformation(
+                    "Home component received ImageAdded for {ImageId} on instance {InstanceName}. Navigating to image page.",
+                    image.Id,
+                    Environment.MachineName);
+            }
+
             NavigationManager.NavigateTo($"image/{image.Id}");
             StateHasChanged();
         });
@@ -55,5 +73,10 @@ else
     public void Dispose()
     {
         Notifications.ImageAdded -= OnImageAdded;
+
+        if (Logger.IsEnabled(LogLevel.Information))
+        {
+            Logger.LogInformation("Home component unsubscribed from ImageAdded on instance {InstanceName}.", Environment.MachineName);
+        }
     }
 }

@@ -99,6 +99,15 @@ public sealed class ImageFolderMonitorService : BackgroundService
 
         if (_initialScanComplete)
         {
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation(
+                    "Notifying image added for {ImageId} ({ImageFile}) on instance {InstanceName}.",
+                    image.Id,
+                    fileInfo.Name,
+                    Environment.MachineName);
+            }
+
             await _notificationService.NotifyImageAddedAsync(image, cancellationToken);
         }
         if (_logger.IsEnabled(LogLevel.Information))

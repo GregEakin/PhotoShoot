@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging.Abstractions;
 using PhotoShoot.Hubs;
 using PhotoShoot.Models;
 using PhotoShoot.Services;
@@ -11,7 +12,7 @@ public class ImageNotificationServiceTests
     public async Task NotifyImageAddedAsync_raises_image_added_event()
     {
         var hubContext = new TestHubContext();
-        var service = new ImageNotificationService(hubContext);
+        var service = new ImageNotificationService(hubContext, NullLogger<ImageNotificationService>.Instance);
         var image = CreateImage("img-1");
 
         MonitoredImage? raisedImage = null;
@@ -32,7 +33,7 @@ public class ImageNotificationServiceTests
     public async Task NotifyImageAddedAsync_sends_signalr_message_to_all_clients()
     {
         var hubContext = new TestHubContext();
-        var service = new ImageNotificationService(hubContext);
+        var service = new ImageNotificationService(hubContext, NullLogger<ImageNotificationService>.Instance);
         var image = CreateImage("img-2");
 
         await service.NotifyImageAddedAsync(image);

@@ -4,6 +4,7 @@
 @inject IImageCatalog Catalog
 @inject IImageNotificationService Notifications
 @inject NavigationManager NavigationManager
+@inject ILogger<Image> Logger
 
 <PageTitle>@(_image?.DisplayName ?? "Image not found")</PageTitle>
 
@@ -60,6 +61,14 @@ else
     protected override void OnInitialized()
     {
         Notifications.ImageAdded += OnImageAdded;
+
+        if (Logger.IsEnabled(LogLevel.Information))
+        {
+            Logger.LogInformation(
+                "Image component subscribed to ImageAdded on instance {InstanceName}. Current route id: {ImageId}.",
+                Environment.MachineName,
+                Id);
+        }
     }
 
     protected override void OnParametersSet()
@@ -71,6 +80,14 @@ else
     {
         _ = InvokeAsync(() =>
         {
+            if (Logger.IsEnabled(LogLevel.Information))
+            {
+                Logger.LogInformation(
+                    "Image component received ImageAdded for {ImageId} on instance {InstanceName}. Navigating to image page.",
+                    newImage.Id,
+                    Environment.MachineName);
+            }
+
             NavigationManager.NavigateTo($"image/{newImage.Id}");
         });
     }
@@ -78,5 +95,10 @@ else
     public void Dispose()
     {
         Notifications.ImageAdded -= OnImageAdded;
+
+        if (Logger.IsEnabled(LogLevel.Information))
+        {
+            Logger.LogInformation("Image component unsubscribed from ImageAdded on instance {InstanceName}.", Environment.MachineName);
+        }
     }
 }
