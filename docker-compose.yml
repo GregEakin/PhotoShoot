@@ -12,8 +12,11 @@ services:
       # Named volumes for generated assets
       - photoshoot-thumbnails:/data/thumbnails
       - photoshoot-histograms:/data/histograms
+      # Persist ASP.NET Core Data Protection keys for antiforgery/auth cookies
+      - photoshoot-data-protection-keys:/data/data-protection-keys
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - PHOTOSHOOT_DATA_PROTECTION_KEYS=/data/data-protection-keys
       # Override folder paths or poll interval here if needed, e.g.:
       # - ImageMonitor__PollIntervalSeconds=10
     restart: unless-stopped
@@ -21,3 +24,4 @@ services:
 volumes:
   photoshoot-thumbnails:
   photoshoot-histograms:
+  photoshoot-data-protection-keys:
