@@ -1,0 +1,23 @@
+services:
+  photoshoot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      # Bind-mount the FTP drop folder (read-only — the app only reads from here)
+      # Update this path to match where your FTP server places files on the host.
+      - /home/ftpuser:/data/images:ro
+      # Named volumes for generated assets
+      - photoshoot-thumbnails:/data/thumbnails
+      - photoshoot-histograms:/data/histograms
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      # Override folder paths or poll interval here if needed, e.g.:
+      # - ImageMonitor__PollIntervalSeconds=10
+    restart: unless-stopped
+
+volumes:
+  photoshoot-thumbnails:
+  photoshoot-histograms:

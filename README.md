@@ -31,45 +31,52 @@ This app runs well on a [Raspberry Pi](https://www.raspberrypi.com/) using `Rasp
 
 Install `git`, then clone this repository to your Pi.
 
-### 2) Install .NET (ARM)
+### 2) Install Docker
 
-Use Microsoft guidance for ARM single-board computers:
+[Install Docker Engine on Debian](https://docs.docker.com/engine/install/debian/)
 
-[Deploy .NET apps on ARM single-board computers](https://learn.microsoft.com/en-us/dotnet/iot/deployment)
-
-Install the latest LTS SDK/runtime with:
-
-`curl -sSL https://dot.net/v1/dotnet-install.sh | bash /dev/stdin --channel LTS`
+> **Note:** .NET does not need to be installed separately. The Docker image bundles the runtime.
 
 ### 3) Install and configure FTP
 
 Install `vsftpd`, then configure it to write incoming files to your chosen folder (for example `/home/ftpuser`).
 
-### 4) Create processing folders
+### 4) Configure `docker-compose.yml`
 
-Create folders for generated files, for example:
+Edit `docker-compose.yml` and update the bind mount under `volumes:` to point to your FTP drop folder:
 
-- `/home/greg/thumbnails`
-- `/home/greg/histograms`
+```yaml
+volumes:
+  - /home/ftpuser:/data/images:ro   # ← set this to your FTP folder
+```
 
-### 5) Update `PhotoShoot/appsettings.json`
+Thumbnail and histogram folders are managed automatically as Docker named volumes — no need to create them manually.
 
-Set the `ImageMonitor` paths to match your Pi:
+You can also override any `ImageMonitor` setting via the `environment:` block using the `__` separator, for example:
 
-- `InputFolder`: FTP drop folder
-- `ThumbnailFolder`: thumbnail output folder
-- `HistogramFolder`: histogram output folder
+```yaml
+environment:
+  - ImageMonitor__PollIntervalSeconds=10
+```
 
-Current example:
-
-- `InputFolder`: `/home/ftpuser`
-- `ThumbnailFolder`: `/home/greg/thumbnails`
-- `HistogramFolder`: `/home/greg/histograms`
-
-### 6) Run the app
+### 5) Build and run with Docker
 
 From the repo root:
 
-`dotnet run -c Release`
+```sh
+docker compose up -d --build
+```
+
+To view logs:
+
+```sh
+docker compose logs -f
+```
+
+To stop:
+
+```sh
+docker compose down
+```
 
 Once running, new photos uploaded by the camera appear in the gallery automatically.
