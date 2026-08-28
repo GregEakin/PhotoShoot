@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components.Server.Circuits;
 using Microsoft.Extensions.FileProviders;
 using PhotoShoot.Components;
 using PhotoShoot.Hubs;
@@ -14,6 +15,7 @@ builder.Services.Configure<ImageMonitorOptions>(builder.Configuration.GetSection
 builder.Services.AddSingleton<IImageCatalog, InMemoryImageCatalog>();
 builder.Services.AddSingleton<IImageThumbnailService, ImageThumbnailService>();
 builder.Services.AddSingleton<IImageNotificationService, ImageNotificationService>();
+builder.Services.AddScoped<CircuitHandler, CircuitLoggingHandler>();
 builder.Services.AddHostedService<ImageFolderMonitorService>();
 
 var imageMonitorOptions = builder.Configuration.GetSection("ImageMonitor").Get<ImageMonitorOptions>() ?? new ImageMonitorOptions();
