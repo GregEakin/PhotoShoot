@@ -8,7 +8,7 @@ namespace PhotoShoot.Services;
 
 public sealed class ImageThumbnailService : IImageThumbnailService
 {
-    private static readonly ConcurrentDictionary<string, SemaphoreSlim> ThumbnailLocks = new(StringComparer.OrdinalIgnoreCase);
+    private static readonly ConcurrentDictionary<string, SemaphoreSlim> OutputLocks = new(StringComparer.OrdinalIgnoreCase);
 
     private readonly ImageMonitorOptions _options;
 
@@ -23,14 +23,15 @@ public sealed class ImageThumbnailService : IImageThumbnailService
 
         Directory.CreateDirectory(_options.ThumbnailFolder);
 
+        var sourceFileInfo = new FileInfo(sourceFilePath);
         var thumbnailFileName = Path.GetFileNameWithoutExtension(sourceFilePath) + ".webp";
         var thumbnailPath = Path.Combine(_options.ThumbnailFolder, thumbnailFileName);
-        var thumbnailLock = ThumbnailLocks.GetOrAdd(thumbnailPath, static _ => new SemaphoreSlim(1, 1));
+        var thumbnailLock = OutputLocks.GetOrAdd(thumbnailPath, static _ => new SemaphoreSlim(1, 1));
 
         await thumbnailLock.WaitAsync(cancellationToken);
         try
         {
-            if (File.Exists(thumbnailPath))
+            if (IsOutputUpToDate(thumbnailPath, sourceFileInfo.LastWriteTimeUtc))
             {
                 return thumbnailPath;
             }
@@ -68,24 +69,59 @@ public sealed class ImageThumbnailService : IImageThumbnailService
         }
     }
 
-    public Task<string> CreateHistogramAsync(string sourceFilePath, CancellationToken cancellationToken = default)
+    public async Task<string> CreateHistogramAsync(string sourceFilePath, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         Directory.CreateDirectory(_options.HistogramFolder);
 
+        var sourceFileInfo = new FileInfo(sourceFilePath);
         var histogramFileName = Path.GetFileNameWithoutExtension(sourceFilePath) + "-hist.png";
         var histogramPath = Path.Combine(_options.HistogramFolder, histogramFileName);
+        var histogramLock = OutputLocks.GetOrAdd(histogramPath, static _ => new SemaphoreSlim(1, 1));
 
-        if (File.Exists(histogramPath))
+        await histogramLock.WaitAsync(cancellationToken);
+        try
         {
-            return Task.FromResult(histogramPath);
+            if (IsOutputUpToDate(histogramPath, sourceFileInfo.LastWriteTimeUtc))
+            {
+                return histogramPath;
+            }
+
+            var tempHistogramPath = Path.Combine(_options.HistogramFolder, $".{histogramFileName}.{Guid.NewGuid():N}.tmp");
+            try
+            {
+                using var sourceImage = new MagickImage(sourceFilePath);
+                sourceImage.AutoOrient();
+                sourceImage.Write($"histogram:{tempHistogramPath}");
+                File.Move(tempHistogramPath, histogramPath, true);
+            }
+            catch
+            {
+                if (File.Exists(tempHistogramPath))
+                {
+                    File.Delete(tempHistogramPath);
+                }
+
+                throw;
+            }
+
+            return histogramPath;
+        }
+        finally
+        {
+            histogramLock.Release();
+        }
+    }
+
+    private static bool IsOutputUpToDate(string outputPath, DateTime sourceLastWriteTimeUtc)
+    {
+        if (!File.Exists(outputPath))
+        {
+            return false;
         }
 
-        using var sourceImage = new MagickImage(sourceFilePath);
-        sourceImage.AutoOrient();
-        sourceImage.Write($"histogram:{histogramPath}");
-
-        return Task.FromResult(histogramPath);
+        var outputLastWriteTimeUtc = File.GetLastWriteTimeUtc(outputPath);
+        return outputLastWriteTimeUtc >= sourceLastWriteTimeUtc;
     }
 }
