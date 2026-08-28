@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Components.Server.Circuits;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.FileProviders;
 using PhotoShoot.Components;
 using PhotoShoot.Hubs;
@@ -11,6 +12,15 @@ builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddSignalR();
+
+var dataProtectionKeysFolder = Environment.GetEnvironmentVariable("PHOTOSHOOT_DATA_PROTECTION_KEYS")
+    ?? Path.Combine(builder.Environment.ContentRootPath, "data-protection-keys");
+Directory.CreateDirectory(dataProtectionKeysFolder);
+
+builder.Services.AddDataProtection()
+    .SetApplicationName("PhotoShoot")
+    .PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysFolder));
+
 builder.Services.Configure<ImageMonitorOptions>(builder.Configuration.GetSection("ImageMonitor"));
 builder.Services.AddSingleton<IImageCatalog, InMemoryImageCatalog>();
 builder.Services.AddSingleton<IImageThumbnailService, ImageThumbnailService>();
@@ -66,7 +76,10 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 if (app.Logger.IsEnabled(LogLevel.Information))
+{
     app.Logger.LogInformation("Image monitor watching folder: {InputFolder} (thumbnails: {ThumbnailFolder}, histograms: {HistogramFolder})", inputFolder, thumbnailFolder, histogramFolder);
+    app.Logger.LogInformation("Data Protection keys folder: {DataProtectionKeysFolder}", dataProtectionKeysFolder);
+}
 
 app.Run();
 
