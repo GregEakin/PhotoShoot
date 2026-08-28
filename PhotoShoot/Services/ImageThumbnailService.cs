@@ -88,7 +88,8 @@ public sealed class ImageThumbnailService : IImageThumbnailService
                 return histogramPath;
             }
 
-            var tempHistogramPath = Path.Combine(_options.HistogramFolder, $".{histogramFileName}.{Guid.NewGuid():N}.tmp");
+            var tempHistogramFileName = $".{Path.GetFileNameWithoutExtension(histogramFileName)}.{Guid.NewGuid():N}.png";
+            var tempHistogramPath = Path.Combine(_options.HistogramFolder, tempHistogramFileName);
             try
             {
                 using var sourceImage = new MagickImage(sourceFilePath);
