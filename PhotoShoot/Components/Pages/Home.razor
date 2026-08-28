@@ -47,7 +47,7 @@ else
         _ = InvokeAsync(() =>
         {
             _images = [image, .. _images.Where(existing => !string.Equals(existing.Id, image.Id, StringComparison.OrdinalIgnoreCase))];
-            NavigationManager.NavigateTo($"/image/{image.Id}");
+            NavigationManager.NavigateTo($"image/{image.Id}");
             StateHasChanged();
         });
     }
