@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Create default data directories (overridable via volume mounts)
-RUN mkdir -p /data/images /data/thumbnails /data/histograms
+RUN mkdir -p /data/images /data/thumbnails /data/histograms /data/data-protection-keys
 
 COPY --from=build /app/publish .
 
