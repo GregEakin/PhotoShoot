@@ -59,11 +59,7 @@ public sealed class ImageThumbnailService : IImageThumbnailService
             }
             catch
             {
-                if (File.Exists(tempThumbnailPath))
-                {
-                    File.Delete(tempThumbnailPath);
-                }
-
+                File.Delete(tempThumbnailPath);
                 throw;
             }
 
@@ -111,11 +107,7 @@ public sealed class ImageThumbnailService : IImageThumbnailService
             }
             catch
             {
-                if (File.Exists(tempHistogramPath))
-                {
-                    File.Delete(tempHistogramPath);
-                }
-
+                File.Delete(tempHistogramPath);
                 throw;
             }
 
