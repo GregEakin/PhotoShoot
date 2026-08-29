@@ -361,4 +361,7 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Working folders
 /PhotoShoot/incoming
+/PhotoShoot/data-protection-keys
