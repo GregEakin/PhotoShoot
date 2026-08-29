@@ -70,6 +70,44 @@ public class ImageThumbnailServiceTests
     }
 
     [Test]
+    public async Task CreateThumbnailAsync_recreates_thumbnail_when_source_is_newer()
+    {
+        var root = Path.Combine(Path.GetTempPath(), $"photoshoot-tests-{Guid.NewGuid():N}");
+        var inputFolder = Path.Combine(root, "incoming");
+        var thumbnailFolder = Path.Combine(root, "thumbnails");
+        var histogramFolder = Path.Combine(root, "histograms");
+
+        Directory.CreateDirectory(inputFolder);
+
+        var sourceFilePath = Path.Combine(inputFolder, "sample.jpg");
+        CreateSourceImage(sourceFilePath, MagickColors.Red);
+
+        var service = CreateService(thumbnailFolder, histogramFolder);
+
+        try
+        {
+            var thumbnailPath = await service.CreateThumbnailAsync(sourceFilePath);
+            var initialThumbnailWriteTime = File.GetLastWriteTimeUtc(thumbnailPath);
+
+            await Task.Delay(1200);
+            CreateSourceImage(sourceFilePath, MagickColors.Blue);
+
+            var recreatedThumbnailPath = await service.CreateThumbnailAsync(sourceFilePath);
+            var recreatedThumbnailWriteTime = File.GetLastWriteTimeUtc(recreatedThumbnailPath);
+
+            await Assert.That(recreatedThumbnailPath == thumbnailPath).IsTrue();
+            await Assert.That(recreatedThumbnailWriteTime > initialThumbnailWriteTime).IsTrue();
+        }
+        finally
+        {
+            if (Directory.Exists(root))
+            {
+                Directory.Delete(root, recursive: true);
+            }
+        }
+    }
+
+    [Test]
     public async Task CreateHistogramAsync_creates_histogram_in_configured_folder()
     {
         var root = Path.Combine(Path.GetTempPath(), $"photoshoot-tests-{Guid.NewGuid():N}");
@@ -112,9 +150,9 @@ public class ImageThumbnailServiceTests
         return new ImageThumbnailService(options);
     }
 
-    private static void CreateSourceImage(string path)
+    private static void CreateSourceImage(string path, MagickColor? color = null)
     {
-        using var image = new MagickImage(MagickColors.Red, 800, 600);
+        using var image = new MagickImage(color ?? MagickColors.Red, 800, 600);
         image.Format = MagickFormat.Jpeg;
         image.Write(path);
     }
