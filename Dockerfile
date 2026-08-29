@@ -7,7 +7,7 @@ RUN dotnet restore "PhotoShoot/PhotoShoot.csproj"
 
 COPY . .
 WORKDIR "/src/PhotoShoot"
-RUN dotnet publish "PhotoShoot.csproj" -c Release -o /app/publish --no-restore
+RUN dotnet publish "PhotoShoot.csproj" -c Release -o /app/publish
 
 # Stage 2: Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
