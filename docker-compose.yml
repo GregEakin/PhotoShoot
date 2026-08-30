@@ -2,7 +2,7 @@ services:
   photoshoot:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: PhotoShoot/Dockerfile
     ports:
       - "8090:8080"
     volumes:
