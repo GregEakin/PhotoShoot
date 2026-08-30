@@ -12,7 +12,7 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["PhotoShoot/PhotoShoot.csproj", "PhotoShoot/"]
-RUN dotnet restore "PhotoShoot/PhotoShoot.csproj"
+RUN dotnet restore "./PhotoShoot/PhotoShoot.csproj"
 COPY . .
 WORKDIR "/src/PhotoShoot"
 RUN dotnet build "./PhotoShoot.csproj" -c $BUILD_CONFIGURATION -o /app/build
@@ -34,7 +34,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Create default data directories (overridable via volume mounts)
-RUN mkdir -p /data/images /data/thumbnails /data/histograms /data/data-protection-keys
+RUN mkdir -p /data/images /data/thumbnails /data/histograms /data/data-protection-keys \
+    && chown -R $APP_UID:$APP_UID /data
 
 COPY --from=publish /app/publish .
 
