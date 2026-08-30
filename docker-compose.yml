@@ -20,6 +20,12 @@ services:
       # Override folder paths or poll interval here if needed, e.g.:
       # - ImageMonitor__PollIntervalSeconds=10
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 300s
 
 volumes:
   photoshoot-thumbnails:

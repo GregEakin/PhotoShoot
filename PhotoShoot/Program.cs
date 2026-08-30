@@ -40,6 +40,8 @@ Directory.CreateDirectory(inputFolder);
 Directory.CreateDirectory(thumbnailFolder);
 Directory.CreateDirectory(histogramFolder);
 
+builder.Services.AddHealthChecks();
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())
@@ -81,6 +83,7 @@ if (app.Logger.IsEnabled(LogLevel.Information))
     app.Logger.LogInformation("Data Protection keys folder: {DataProtectionKeysFolder}", dataProtectionKeysFolder);
 }
 
+app.MapHealthChecks("/health");
 app.Run();
 
 static void ValidateConfiguredPathForLinux(string configuredPath, string settingName)
