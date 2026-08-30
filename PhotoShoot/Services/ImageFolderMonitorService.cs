@@ -99,9 +99,9 @@ public sealed class ImageFolderMonitorService : BackgroundService
 
         if (_initialScanComplete)
         {
-            if (_logger.IsEnabled(LogLevel.Information))
+            if (_logger.IsEnabled(LogLevel.Debug))
             {
-                _logger.LogInformation(
+                _logger.LogDebug(
                     "Notifying image added for {ImageId} ({ImageFile}) on instance {InstanceName}.",
                     image.Id,
                     fileInfo.Name,

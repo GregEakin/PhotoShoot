@@ -13,9 +13,9 @@ public sealed class CircuitLoggingHandler : CircuitHandler
 
     public override Task OnCircuitOpenedAsync(Circuit circuit, CancellationToken cancellationToken)
     {
-        if (_logger.IsEnabled(LogLevel.Information))
+        if (_logger.IsEnabled(LogLevel.Debug))
         {
-            _logger.LogInformation(
+            _logger.LogDebug(
                 "Circuit opened. CircuitId={CircuitId}, Instance={InstanceName}",
                 circuit.Id,
                 Environment.MachineName);
@@ -26,9 +26,9 @@ public sealed class CircuitLoggingHandler : CircuitHandler
 
     public override Task OnCircuitClosedAsync(Circuit circuit, CancellationToken cancellationToken)
     {
-        if (_logger.IsEnabled(LogLevel.Information))
+        if (_logger.IsEnabled(LogLevel.Debug))
         {
-            _logger.LogInformation(
+            _logger.LogDebug(
                 "Circuit closed. CircuitId={CircuitId}, Instance={InstanceName}",
                 circuit.Id,
                 Environment.MachineName);
@@ -39,9 +39,9 @@ public sealed class CircuitLoggingHandler : CircuitHandler
 
     public override Task OnConnectionUpAsync(Circuit circuit, CancellationToken cancellationToken)
     {
-        if (_logger.IsEnabled(LogLevel.Information))
+        if (_logger.IsEnabled(LogLevel.Debug))
         {
-            _logger.LogInformation(
+            _logger.LogDebug(
                 "Circuit connection up. CircuitId={CircuitId}, Instance={InstanceName}",
                 circuit.Id,
                 Environment.MachineName);
@@ -52,9 +52,9 @@ public sealed class CircuitLoggingHandler : CircuitHandler
 
     public override Task OnConnectionDownAsync(Circuit circuit, CancellationToken cancellationToken)
     {
-        if (_logger.IsEnabled(LogLevel.Information))
+        if (_logger.IsEnabled(LogLevel.Debug))
         {
-            _logger.LogInformation(
+            _logger.LogDebug(
                 "Circuit connection down. CircuitId={CircuitId}, Instance={InstanceName}",
                 circuit.Id,
                 Environment.MachineName);

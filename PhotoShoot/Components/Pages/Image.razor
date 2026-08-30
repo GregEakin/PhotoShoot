@@ -62,9 +62,9 @@ else
     {
         Notifications.ImageAdded += OnImageAdded;
 
-        if (Logger.IsEnabled(LogLevel.Information))
+        if (Logger.IsEnabled(LogLevel.Debug))
         {
-            Logger.LogInformation(
+            Logger.LogDebug(
                 "Image component subscribed to ImageAdded on instance {InstanceName}. Current route id: {ImageId}.",
                 Environment.MachineName,
                 Id);
@@ -80,9 +80,9 @@ else
     {
         _ = InvokeAsync(() =>
         {
-            if (Logger.IsEnabled(LogLevel.Information))
+            if (Logger.IsEnabled(LogLevel.Debug))
             {
-                Logger.LogInformation(
+                Logger.LogDebug(
                     "Image component received ImageAdded for {ImageId} on instance {InstanceName}. Navigating to image page.",
                     newImage.Id,
                     Environment.MachineName);
@@ -96,9 +96,9 @@ else
     {
         Notifications.ImageAdded -= OnImageAdded;
 
-        if (Logger.IsEnabled(LogLevel.Information))
+        if (Logger.IsEnabled(LogLevel.Debug))
         {
-            Logger.LogInformation("Image component unsubscribed from ImageAdded on instance {InstanceName}.", Environment.MachineName);
+            Logger.LogDebug("Image component unsubscribed from ImageAdded on instance {InstanceName}.", Environment.MachineName);
         }
     }
 }

@@ -19,9 +19,9 @@ public sealed class ImageNotificationService : IImageNotificationService
 
     public async Task NotifyImageAddedAsync(MonitoredImage image, CancellationToken cancellationToken = default)
     {
-        if (_logger.IsEnabled(LogLevel.Information))
+        if (_logger.IsEnabled(LogLevel.Debug))
         {
-            _logger.LogInformation(
+            _logger.LogDebug(
                 "Dispatching ImageAdded for {ImageId} on instance {InstanceName} (local subscribers and hub clients).",
                 image.Id,
                 Environment.MachineName);

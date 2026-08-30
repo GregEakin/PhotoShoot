@@ -42,9 +42,9 @@ else
         _images = [.. Catalog.GetAll()];
         Notifications.ImageAdded += OnImageAdded;
 
-        if (Logger.IsEnabled(LogLevel.Information))
+        if (Logger.IsEnabled(LogLevel.Debug))
         {
-            Logger.LogInformation(
+            Logger.LogDebug(
                 "Home component subscribed to ImageAdded on instance {InstanceName}. Current image count: {ImageCount}.",
                 Environment.MachineName,
                 _images.Count);
@@ -57,9 +57,9 @@ else
         {
             _images = [image, .. _images.Where(existing => !string.Equals(existing.Id, image.Id, StringComparison.OrdinalIgnoreCase))];
 
-            if (Logger.IsEnabled(LogLevel.Information))
+            if (Logger.IsEnabled(LogLevel.Debug))
             {
-                Logger.LogInformation(
+                Logger.LogDebug(
                     "Home component received ImageAdded for {ImageId} on instance {InstanceName}. Navigating to image page.",
                     image.Id,
                     Environment.MachineName);
@@ -74,9 +74,9 @@ else
     {
         Notifications.ImageAdded -= OnImageAdded;
 
-        if (Logger.IsEnabled(LogLevel.Information))
+        if (Logger.IsEnabled(LogLevel.Debug))
         {
-            Logger.LogInformation("Home component unsubscribed from ImageAdded on instance {InstanceName}.", Environment.MachineName);
+            Logger.LogDebug("Home component unsubscribed from ImageAdded on instance {InstanceName}.", Environment.MachineName);
         }
     }
 }
