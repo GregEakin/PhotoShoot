@@ -215,35 +215,28 @@ public sealed class ImageFolderMonitorService : BackgroundService
         }
 
         var dataType = value.DataType.ToString();
-
-        if (rawValue is Rational rational)
+        switch (rawValue)
         {
-            return rational.Denominator != 0 
-                ? $"{rational.Numerator / rational.Denominator}" 
-                : $"{rational.Numerator}/{rational.Denominator}";
+            case Rational rational:
+                return rational.Denominator != 0 
+                    ? $"{rational.Numerator / rational.Denominator}" 
+                    : $"{rational.Numerator}/{rational.Denominator}";
+            case SignedRational signedRational:
+                return signedRational.Denominator != 0
+                    ? $"{(double)signedRational.Numerator / signedRational.Denominator}"
+                    : $"{signedRational.Numerator}/{signedRational.Denominator}";
+            case byte[] bytes when (dataType.Equals("Byte", StringComparison.OrdinalIgnoreCase) || dataType.Equals("Undefined", StringComparison.OrdinalIgnoreCase)):
+                return bytes.Length > 16 
+                    ? $"byte array {bytes.Length} bytes" 
+                    : Convert.ToHexString(bytes);
+            case Array values:
+            {
+                var parts = values.Cast<object?>().Select(item => item?.ToString() ?? string.Empty);
+                return string.Join(", ", parts);
+            }
+            default:
+                return rawValue.ToString() ?? string.Empty;
         }
-
-        if (rawValue is SignedRational signedRational)
-        {
-            return signedRational.Denominator != 0
-                ? $"{(double)signedRational.Numerator / signedRational.Denominator}"
-                : $"{signedRational.Numerator}/{signedRational.Denominator}";
-        }
-
-        if (rawValue is byte[] bytes && (dataType.Equals("Byte", StringComparison.OrdinalIgnoreCase) || dataType.Equals("Undefined", StringComparison.OrdinalIgnoreCase)))
-        {
-            return bytes.Length > 16 
-                ? $"byte array {bytes.Length} bytes" 
-                : Convert.ToHexString(bytes);
-        }
-
-        if (rawValue is Array values)
-        {
-            var parts = values.Cast<object?>().Select(item => item?.ToString() ?? string.Empty);
-            return string.Join(", ", parts);
-        }
-
-        return rawValue.ToString() ?? string.Empty;
     }
 
     private static bool IsFlashFired(string? flash)
