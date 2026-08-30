@@ -26,6 +26,8 @@ RUN dotnet publish "./PhotoShoot.csproj" -c $BUILD_CONFIGURATION -o /app/publish
 FROM base AS final
 WORKDIR /app
 
+USER root
+
 # libgomp1 is required by Magick.NET native libraries on Debian-based images
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgomp1 \
@@ -35,6 +37,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN mkdir -p /data/images /data/thumbnails /data/histograms /data/data-protection-keys
 
 COPY --from=publish /app/publish .
+
+USER $APP_UID
 
 # Bind to HTTP only — HTTPS should be terminated by a reverse proxy
 ENV ASPNETCORE_URLS=http://+:8080
