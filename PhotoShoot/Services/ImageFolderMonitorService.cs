@@ -161,6 +161,8 @@ public sealed class ImageFolderMonitorService : BackgroundService
         //     Console.WriteLine("{0}({1}): {2}", value.Tag, value.DataType, FormatExifValue(value));
         // }
 
+        // var stackCount = 30 images;
+
         var exposureValue = GetExifTagValue(profile, ExifTag.ExposureTime);
         var exposure = exposureValue is Rational exposureRational
             ? $"{exposureRational.Numerator}/{exposureRational.Denominator}"
@@ -195,9 +197,9 @@ public sealed class ImageFolderMonitorService : BackgroundService
         var flash = flashValue is ushort flashShort
             ? flashShort.ToString(CultureInfo.InvariantCulture)
             : image.GetAttribute("exif:Flash");
-        var flashSuffix = IsFlashFired(flash) ? " w/ flash" : string.Empty;
+        var flashSuffix = IsFlashFired(flash) ? "- w/ flash" : string.Empty;
 
-        return $"{exposure} sec at f/{fNumber} with ISO {iso} and {focalLength} mm focal length{flashSuffix}";
+        return $"ISO {iso} - {focalLength} mm - f/{fNumber} - {exposure} sec{flashSuffix}";
     }
 
     private static object? GetExifTagValue(IExifProfile profile, ExifTag tag)
