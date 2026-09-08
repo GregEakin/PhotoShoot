@@ -148,7 +148,7 @@ public sealed class ImageThumbnailService : IImageThumbnailService
 
     private static async Task EnsureSourceFileStableAsync(string sourceFilePath, CancellationToken cancellationToken)
     {
-        const int maxAttempts = 10;
+        const int maxAttempts = 20;
         const int stableDelayMs = 300;
 
         var previousLength = -1L;
